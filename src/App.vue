@@ -84,9 +84,9 @@
 
                 <div v-else-if="item.tag == 'ul' || item.tag == 'ol'">
                   <ul v-if="item.tag == 'ul'">
-                    <li v-for="li in item.li" :key="li">
-                      <h6>{{ li.tag }}</h6>
-                      <div class="row" v-for="(input, index) in li.inputs" :key="index">
+                    <li v-for="(li, i) in item.li" :key="i">
+                      <div v-for="input in li.inputs" :key="input.id">
+                        <h6>{{ input.tag }}</h6>
                         <input
                           type="text"
                           class="form-control col-10 mx-1"
@@ -96,9 +96,9 @@
                         <button type="button" @click="deleteInput(input.id, li.inputs)" class="btn btn-outline-danger col-1 mx-1">&#10005;</button>
                       </div>
                     </li>
-                    <div class="ml-5">
-                      <button type="button" @click="addTextInput('p', item.li)" class="btn btn-outline-primary m-1">p</button>
-                      <button type="button" @click="addTextInput('h3', item.li)" class="btn btn-outline-primary m-1">h3</button>
+                    <div class="ml-2">
+                      <button type="button" @click="addItem('p', item.li)" class="btn btn-outline-primary m-1">p</button>
+                      <button type="button" @click="addItem('h3', item.li)" class="btn btn-outline-primary m-1">h3</button>
                     </div>
                   </ul>
                   <ol v-else>
@@ -180,16 +180,17 @@ export default {
     addList(tag, array) {
       array.push({
         id: this.blogInputs,
-        li: [],
+        li: {
+          inputs: []
+        },
         tag: tag
       });
       this.blogInputs++;
     },
     addItem(tag, array) {
-      li.inputs = []
       if(tag == 'h3') {
-        array.push({
-          id: this.blogInputs,
+        array.inputs.push({
+          id: this.blogInputs++,
           text: "",
           tag: 'h3'
         },
@@ -197,9 +198,9 @@ export default {
           id: this.blogInputs,
           text: "",
           tag: 'p'
-        });       
+        }); 
       } else {
-        array.push({
+        array.inputs.push({
           id: this.blogInputs,
           text: "",
           tag: tag

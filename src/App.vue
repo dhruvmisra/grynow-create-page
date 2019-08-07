@@ -67,7 +67,7 @@
           </div>
         </div>
 
-        <div class="form-group col-sm-12 col-md-8 mx-auto">
+        <div class="form-group col-12 mx-auto">
           <label for="blogContent">Blog Content</label>
           <div id="blogContent">
             <div class="form-group" v-for="item in blogContent" :key="item.id">
@@ -82,38 +82,91 @@
                   v-if="item.tag == 'img'"
                 />
 
-                <div v-else-if="item.tag == 'ul' || item.tag == 'ol'">
+                <div class="col-10" v-else-if="item.tag == 'ul' || item.tag == 'ol'">
                   <ul v-if="item.tag == 'ul'">
                     <li v-for="(li, i) in item.li" :key="i">
                       <div v-for="input in li.inputs" :key="input.id">
                         <h6>{{ input.tag }}</h6>
-                        <input
-                          type="text"
-                          class="form-control col-10 mx-1"
-                          placeholder="Content"
-                          v-model="input.text"
-                        />
-                        <button type="button" @click="deleteInput(input.id, li.inputs)" class="btn btn-outline-danger col-1 mx-1">&#10005;</button>
+                        <div class="row m-0">
+                          <input
+                            type="text"
+                            class="form-control col-10 mx-1"
+                            placeholder="Content"
+                            v-model="input.text"
+                          />
+                          <button
+                            type="button"
+                            @click="deleteInput(input.id, li.inputs)"
+                            class="btn btn-outline-danger col-1 mx-1"
+                          >&#10005;</button>
+                        </div>
+                      </div>
+                      <div class="ml-2">
+                        <button
+                          type="button"
+                          @click="addItem('p', li.inputs)"
+                          class="btn btn-outline-info m-1"
+                        >p</button>
+                        <button
+                          type="button"
+                          @click="addItem('h3', li.inputs)"
+                          class="btn btn-outline-info m-1"
+                        >h3</button>
+                        <button
+                          type="button"
+                          @click="deleteListItem(i, item.li)"
+                          class="btn btn-outline-danger m-1"
+                        >&#10005;</button>
                       </div>
                     </li>
-                    <div class="ml-2">
-                      <button type="button" @click="addItem('p', item.li)" class="btn btn-outline-primary m-1">p</button>
-                      <button type="button" @click="addItem('h3', item.li)" class="btn btn-outline-primary m-1">h3</button>
-                    </div>
+                    <button
+                      type="button"
+                      @click="addListItem(item.li)"
+                      class="btn btn-outline-warning m-1"
+                    >Add List Item</button>
                   </ul>
                   <ol v-else>
-                    <li v-for="li in item.li" :key="li.id">
-                      <h6>{{ li.tag }}</h6>
-                      <input
-                        type="text"
-                        class="form-control col-10 mx-1"
-                        placeholder="Content"
-                        v-model="li.text"
-                      />
-                      <button type="button" @click="deleteInput(input.id, li)" class="btn btn-outline-danger col-1 mx-1">&#10005;</button>
+                    <li v-for="(li, i) in item.li" :key="i">
+                      <div v-for="input in li.inputs" :key="input.id">
+                        <h6>{{ input.tag }}</h6>
+                        <div class="row m-0">
+                          <input
+                            type="text"
+                            class="form-control col-10 mx-1"
+                            placeholder="Content"
+                            v-model="input.text"
+                          />
+                          <button
+                            type="button"
+                            @click="deleteInput(input.id, li.inputs)"
+                            class="btn btn-outline-danger col-1 mx-1"
+                          >&#10005;</button>
+                        </div>
+                      </div>
+                      <div class="ml-2">
+                        <button
+                          type="button"
+                          @click="addItem('p', li.inputs)"
+                          class="btn btn-outline-info m-1"
+                        >p</button>
+                        <button
+                          type="button"
+                          @click="addItem('h3', li.inputs)"
+                          class="btn btn-outline-info m-1"
+                        >h3</button>
+                        <button
+                          type="button"
+                          @click="deleteListItem(i, item.li)"
+                          class="btn btn-outline-danger m-1"
+                        >&#10005;</button>
+                      </div>
                     </li>
+                    <button
+                      type="button"
+                      @click="addListItem(item.li)"
+                      class="btn btn-outline-warning m-1"
+                    >Add List Item</button>
                   </ol>
-
                 </div>
 
                 <input
@@ -123,14 +176,34 @@
                   v-else
                   v-model="item.text"
                 />
-                <button type="button" @click="deleteInput(item.id, blogContent)" class="btn btn-outline-danger col-1 mx-1">&#10005;</button>
+                <button
+                  type="button"
+                  @click="deleteInput(item.id, blogContent)"
+                  class="btn btn-outline-danger col-1 mx-1"
+                >&#10005;</button>
               </div>
             </div>
 
-            <button type="button" class="btn btn-outline-primary m-1" @click="addTextInput('p', blogContent)">p</button>
-            <button type="button" class="btn btn-outline-primary m-1" @click="addTextInput('h2', blogContent)">h2</button>
-            <button type="button" class="btn btn-outline-primary m-1" @click="addList('ul', blogContent)">ul</button>
-            <button type="button" class="btn btn-outline-primary m-1" @click="addList('ol', blogContent)">ol</button>
+            <button
+              type="button"
+              class="btn btn-outline-primary m-1"
+              @click="addTextInput('p', blogContent)"
+            >p</button>
+            <button
+              type="button"
+              class="btn btn-outline-primary m-1"
+              @click="addTextInput('h2', blogContent)"
+            >h2</button>
+            <button
+              type="button"
+              class="btn btn-outline-primary m-1"
+              @click="addList('ul', blogContent)"
+            >ul</button>
+            <button
+              type="button"
+              class="btn btn-outline-primary m-1"
+              @click="addList('ol', blogContent)"
+            >ol</button>
             <button type="button" class="btn btn-outline-primary m-1" @click="addImage()">img</button>
           </div>
         </div>
@@ -180,27 +253,37 @@ export default {
     addList(tag, array) {
       array.push({
         id: this.blogInputs,
-        li: {
+        li: [{
           inputs: []
-        },
+        }],
         tag: tag
       });
       this.blogInputs++;
     },
-    addItem(tag, array) {
-      if(tag == 'h3') {
-        array.inputs.push({
-          id: this.blogInputs++,
-          text: "",
-          tag: 'h3'
-        },
-        {
-          id: this.blogInputs,
-          text: "",
-          tag: 'p'
-        }); 
+    addListItem(li) {
+      li.push({
+        inputs: []
+      });
+    },
+    deleteListItem(index, array) {
+      array.splice(index, 1);
+    },
+    addItem(tag, inputs) {
+      if (tag == "h3") {
+        inputs.push(
+          {
+            id: this.blogInputs++,
+            text: "",
+            tag: "h3"
+          },
+          {
+            id: this.blogInputs,
+            text: "",
+            tag: "p"
+          }
+        );
       } else {
-        array.inputs.push({
+        inputs.push({
           id: this.blogInputs,
           text: "",
           tag: tag
@@ -211,13 +294,13 @@ export default {
     addImage() {
       this.blogContent.push({
         id: this.blogInputs,
-        src: '',
-        tag: 'img',
+        src: "",
+        tag: "img",
         imgId: this.blogImages
       });
       this.blogImages++;
       this.blogInputs++;
-    },  
+    },
     deleteInput(id, array) {
       const index = array.findIndex(item => {
         return item.id == id;

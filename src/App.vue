@@ -78,8 +78,10 @@
                   type="file"
                   accept="image/*"
                   class="col-10 mx-1"
+                  :id="item.imgId"
                   placeholder="Content"
                   v-if="item.tag == 'img'"
+                  @change="bindImage($event, item)"
                 />
 
                 <div class="col-10" v-else-if="item.tag == 'ul' || item.tag == 'ol'">
@@ -169,6 +171,34 @@
                   </ol>
                 </div>
 
+                <textarea
+                  name="para"
+                  cols="30"
+                  rows="5"
+                  class="form-control col-9 mx-1"
+                  placeholder="Content"
+                  v-else-if="item.tag == 'p'"
+                  v-model="item.text"
+                ></textarea>
+
+                <div v-else-if="item.tag == 'a'" class="col-10 row">
+                  <input
+                    type="text"
+                    class="form-control col-10 mx-1"
+                    placeholder="Content"
+                    v-model="item.text"
+                  />
+                  <div class="custom-control custom-checkbox my-auto">
+                    <input
+                      type="checkbox"
+                      class="custom-control-input"
+                      id="nofollow"
+                      v-model="item.nofollow"
+                    />
+                    <label class="custom-control-label" for="nofollow">nofollow</label>
+                  </div>
+                </div>
+
                 <input
                   type="text"
                   class="form-control col-10 mx-1"
@@ -176,10 +206,11 @@
                   v-else
                   v-model="item.text"
                 />
+
                 <button
                   type="button"
                   @click="deleteInput(item.id, blogContent)"
-                  class="btn btn-outline-danger col-1 mx-1"
+                  class="btn btn-outline-danger col-1 mx-1 ml-auto"
                 >&#10005;</button>
               </div>
             </div>
@@ -189,6 +220,11 @@
               class="btn btn-outline-primary m-1"
               @click="addTextInput('p', blogContent)"
             >p</button>
+            <button
+              type="button"
+              class="btn btn-outline-primary m-1"
+              @click="addLink(blogContent)"
+            >a</button>
             <button
               type="button"
               class="btn btn-outline-primary m-1"
@@ -217,19 +253,29 @@
 </template>
 
 <script>
+import JSZip from 'jszip';
+import FileSaver from 'file-saver';
+
 export default {
   name: "app",
   data() {
     return {
-      fileName: "blog-blah",
+      fileName: "blog",
       metaTitle: "",
       metaDescription: "",
       blogTitle: "",
       author: "",
       blogContent: [],
-      blogInputs: 0,
-      blogImages: 1,
-      pageContent: ""
+      blogImages: [{
+        id: 0,
+        file: null,
+        tag: "img",
+        imgId: 1
+      }],
+      blogImagesId: 2,
+      blogInputs: 1,
+      pageContent: "",
+      zip: new JSZip()
     };
   },
   computed: {
@@ -242,7 +288,6 @@ export default {
   },
   methods: {
     addTextInput(tag, array) {
-      console.log(array);
       array.push({
         id: this.blogInputs,
         text: "",
@@ -250,12 +295,23 @@ export default {
       });
       this.blogInputs++;
     },
+    addLink(array) {
+      array.push({
+        id: this.blogInputs,
+        text: "",
+        nofollow: true,
+        tag: 'a'
+      });
+      this.blogInputs++;
+    },
     addList(tag, array) {
       array.push({
         id: this.blogInputs,
-        li: [{
-          inputs: []
-        }],
+        li: [
+          {
+            inputs: []
+          }
+        ],
         tag: tag
       });
       this.blogInputs++;
@@ -269,37 +325,46 @@ export default {
       array.splice(index, 1);
     },
     addItem(tag, inputs) {
-      if (tag == "h3") {
-        inputs.push(
-          {
-            id: this.blogInputs++,
-            text: "",
-            tag: "h3"
-          },
-          {
-            id: this.blogInputs,
-            text: "",
-            tag: "p"
-          }
-        );
-      } else {
-        inputs.push({
-          id: this.blogInputs,
-          text: "",
-          tag: tag
-        });
-      }
+      inputs.push({
+        id: this.blogInputs,
+        text: "",
+        tag: tag
+      });
       this.blogInputs++;
     },
     addImage() {
       this.blogContent.push({
         id: this.blogInputs,
-        src: "",
+        file: null,
         tag: "img",
-        imgId: this.blogImages
+        imgId: this.blogImagesId
       });
-      this.blogImages++;
+      this.blogImagesId++;
       this.blogInputs++;
+    },
+    bindImage(event, item) {
+      let file = event.target.files[0];
+      this.addImagesToZip(file);
+      let type = file.type;
+      let imgName = file.name;
+      let blob = new Blob([file], {type: type});
+      // console.log(blob);
+      
+      // let objectURL = window.URL.createObjectURL(blob);
+      // console.log(objectURL);
+
+      // let link = document.createElement('a');
+      // link.href = objectURL;
+      // link.download = imgName;
+      // document.body.appendChild(link);
+      // link.click();
+      // link.remove();
+    },
+    addImagesToZip(file) {
+      this.zip.folder("assets").file('image.png', file);
+      // this.zip.generateAsync({type: "blob"}).then(function(content) {
+      //   FileSaver.saveAs(content, "upload.zip");
+      // });
     },
     deleteInput(id, array) {
       const index = array.findIndex(item => {
@@ -329,7 +394,8 @@ export default {
 	<link rel="stylesheet" href="../css/aos.css" />
 	<!-- Custom CSS -->
 	<link rel="stylesheet" type="text/css" href="../css/styles.css">
-	<link rel="stylesheet" type="text/css" href="../css/styles-blog.css"></head>
+  <link rel="stylesheet" type="text/css" href="../css/styles-blog.css">
+</head>
 <body>
 
   <!-- Navbar -->
@@ -393,7 +459,89 @@ export default {
 
       <div class="blog-content col-md-8 mx-auto">
 `;
-      this.pageContent += `<span class="author">- ${this.author}`;
+
+      for(let i=0; i<this.blogContent.length; i++) {
+        let item = this.blogContent[i];
+        switch(item.tag) {
+          case 'p': {
+            this.pageContent += `
+              <p>${item.text}</p>`;
+            break;
+          }
+          case 'h2': {
+            this.pageContent += `
+              <h2>${item.text}</h2>`;
+            break;
+          }
+          case 'a': {
+            this.pageContent += `
+              <a `;
+            if(item.nofollow) {
+              this.pageContent += `rel="nofollow `;
+            }
+            this.pageContent += `href="${item.text}">${item.text}</a>`;
+            break;
+          }
+          case 'ul': {
+            this.pageContent += `
+              <ul>`;
+                for(let j=0; j<item.li.length; j++) {
+                  let li = item.li[j];
+                  this.pageContent += `
+                    <li>`;
+                  for(let k=0; k<li.inputs.length; k++) {
+                    let input = li.inputs[k];
+                    switch(input.tag) {
+                      case 'p': {
+                        this.pageContent += `
+                          <p>${input.text}</p>`;
+                        break;
+                      }
+                      case 'h3': {
+                        this.pageContent += `
+                          <h3>${input.text}</h3>`;
+                        break;
+                      }
+                    }
+                  }
+                  this.pageContent += `
+                    </li>`;
+                }
+            this.pageContent += `
+              </ul>`;
+              break;
+          }
+          case 'ol': {
+            this.pageContent += `
+              <ol>`;
+                for(let li in item.li) {
+                  this.pageContent += `
+                    <li>`;
+                  for(let input in li.inputs) {
+                    switch(input.tag) {
+                      case 'p': {
+                        this.pageContent += `
+                          <p>${item.text}</p>`;
+                        break;
+                      }
+                      case 'h3': {
+                        this.pageContent += `
+                          <h3>${item.text}</h3>`;
+                        break;
+                      }
+                    }
+                  }
+                  this.pageContent += `
+                    </li>`;
+                }
+            this.pageContent += `
+              </ol>`;
+              break;
+          }
+        }
+      }
+      this.pageContent += `
+        <span class="author">- ${this.author}</span>`;
       console.log(this.pageContent);
     },
     downloadFile() {

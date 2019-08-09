@@ -266,23 +266,24 @@
 
       <button class="d-block btn btn-danger btn-lg px-5 mx-auto my-5" @click="createPage">Create</button>
 
-      <section v-if="created">
+      <section v-if="created" class="mb-5" style="font-size: 1.3em">
         <div class="container">
-          <h6>Follow these steps to add the blog page: </h6>
+          <h3>Follow these steps to add the blog page: </h3>
           <ol>
-            <li>Login to Cpanel by going to <a href="http://www.grynow.in/cpanel">http://www.grynow.in/cpanel</a>. </li>
-            <li>Open File Manager and open the 'public_html' directory.</li>
-            <li>Click the 'Upload' button and upload the zip file just downloaded. Close the upload page when completed.</li>
-            <li>Refresh the public_html directory to find the upload.zip file. Right click on the file and 
+            <li class="my-2">Login to Cpanel by going to <a href="http://www.grynow.in/cpanel" target="_blank">http://www.grynow.in/cpanel</a>. </li>
+            <li class="my-2">Open File Manager and open the 'public_html' directory.</li>
+            <li class="my-2">Click the 'Upload' button and upload the zip file just downloaded. Close the upload page when completed.</li>
+            <li class="my-2">Refresh the public_html directory to find the upload.zip file. Right click on the file and 
               select 'Extract'. Click on 'Extract File(s)' button.</li>
-            <li>
-              Open 'blogs.html' and copy & paste the following code inside the blog list: 
+            <li class="my-2">
+              Right-click 'blogs.html' and select Edit. Copy & paste the following code inside the blog list: 
               <div class="col-sm-12 col-md-8 rounded-lg bg-secondary p-5 m-2">
                 <p class="text-white">
                   {{ blogsCode }}
                 </p>
               </div>
             </li>
+            <li class="my-2">Save changes and close the file. Delete the upload.zip file from public_html.</li>
           </ol>
         </div>
       </section>
@@ -324,7 +325,7 @@ export default {
       return this.fileName + ".html";
     },
     url() {
-      return "http://www.grynow.in/" + this.fileNameWithExtention;
+      return "http://www.grynow.in/blog/" + this.fileNameWithExtention;
     }
   },
   methods: {
@@ -760,28 +761,9 @@ export default {
       
       this.zip.generateAsync({type: "blob"}).then(function(content) {
         FileSaver.saveAs(content, "upload.zip");
-        this.created = true;
       });
+      this.created = true;
     },
-    downloadFile() {
-      let file = new Blob([this.pageContent], { type: "text/plain" });
-      if (window.navigator.msSaveOrOpenBlob)
-        // IE10+
-        window.navigator.msSaveOrOpenBlob(file, this.fileNameWithExtention);
-      else {
-        // Others
-        let a = document.createElement("a"),
-          url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = this.fileNameWithExtention;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(function() {
-          document.body.removeChild(a);
-          window.URL.revokeObjectURL(url);
-        }, 0);
-      }
-    }
   }
 };
 </script>
